@@ -34,29 +34,11 @@ train_enc, val_enc = train.train_test_split(split_fraction=0.2)
 
 #Start fitting
 fit_sys_ss_enc.fit(train_sys_data=train_enc, val_sys_data=val_enc, \
-                   epochs=1000, batch_size=1024, loss_kwargs={'nf':100}) #nf is T in paper
+                   epochs=500, batch_size=256, loss_kwargs={'nf':100}) #nf is T in paper
 
 print(fit_sys_ss_enc.fn) #state network x_t+1 = f([x,u])
 print(fit_sys_ss_enc.hn) #output network y_t = h(x_t)
 print(fit_sys_ss_enc.encoder) #encoder network x_t = psi([upast, ypast])
 
-test_sim_enc = fit_sys_ss_enc.apply_experiment(test)
 
-# fit_sys_IO.save_system('IO-sys')
-# fit_sys_SS.save_system('SS-sys')
 fit_sys_ss_enc.save_system('enc-sys')
-
-plt.plot(test.y)
-plt.plot(test.y - test_sim_enc.y)
-plt.title(f'test set simulation SS encoder, NRMS = {test_sim_enc.NRMS(test):.2%}')
-plt.show()
-plt.savefig('test_res_sim.png')
-plt.close()
-
-train_sim_enc = fit_sys_ss_enc.apply_experiment(train)
-
-plt.plot(train.y)
-plt.plot(train.y - train_sim_enc.y)
-plt.title(f'train set simulation SS encoder, NRMS = {train_sim_enc.NRMS(train):.2%}')
-plt.savefig('train_res_sim.png')
-plt.show()

@@ -56,11 +56,11 @@ u, y = out['V1'][0], out['V2'][0]
 train, test = System_data(u=u[40000:],y=y[40000:]), System_data(u=u[:40000],y=y[:40000])
 
 fit_sys = deepSI.fit_systems.SS_encoder_general(nx=2, na=50, nb=50, \
-                                                e_net=base_encoder_net, e_net_kwargs=dict(n_nodes_per_layer=64, n_hidden_layers=2, activation=nn.Tanh),\
+                                                e_net=base_encoder_net, e_net_kwargs=dict(n_nodes_per_layer=64, n_hidden_layers=4, activation=nn.Tanh),\
                                                 f_net=base_state_net, f_net_kwargs=dict(n_hidden_layers=0),\
                                                 h_net=identity)
 
 train, test = deepSI.datasets.Silverbox()
-fit_sys.fit(train, test, epochs=100, loss_kwargs=dict(nf=100))
+fit_sys.fit(train, test, epochs=500, loss_kwargs=dict(nf=100))
 
 fit_sys.save_system('H_identity_F_linear')

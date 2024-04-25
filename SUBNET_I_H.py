@@ -61,6 +61,6 @@ fit_sys = deepSI.fit_systems.SS_encoder_general(nx=2, na=50, nb=50, \
                                                 h_net=identity)
 
 train, test = deepSI.datasets.Silverbox()
-fit_sys.fit(train, test, epochs=100, loss_kwargs=dict(nf=100))
+fit_sys.fit(train, test, epochs=500, loss_kwargs=dict(nf=100))
 
 fit_sys.save_system('H_identity')
