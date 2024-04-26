@@ -93,7 +93,7 @@ def SINDyLoss2(X_pred, X_true, Theta, Xi, l):
 
 epochs = 100
 
-lambda_1 = 1e-3
+lambda_1 = 1e-1
 
 batch_size = 256
 n_batches = Theta.shape[0]//batch_size
@@ -122,7 +122,7 @@ for epo in tqdm(range(epochs)):
     if (epo%(epochs//10)==0 or epo==epochs-1) and epo != 0:
         epo_p = epo if epo != epochs-1 else epo+1
         print("Epoch {} train loss: {}".format(epo_p, loss))
-        # print("reg loss {:.4f}, pred loss {:.4f}, l1 loss: {:.4f}".format(reg, pred, l1))
+        print("reg loss {:.4f}, pred loss {:.4f}, l1 loss: {:.4f}".format(reg, pred, l1))
 
 
-torch.save(model.state_dict(), "test_v3")
+torch.save(model.state_dict(), "test_v4")
