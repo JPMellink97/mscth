@@ -26,12 +26,12 @@ u_train = None
 u_test = None
 
 # data dir and file
-save_dir = r"C:\Users\20173928\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data"
+save_dir = r"/home/joost/mscth/data"
 
 out = loadmat(os.path.join(save_dir,'Silverbox_full_state_low_error.mat'))
 x_data = out['xOptTot']
 
-save_dir = r"C:\Users\20173928\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data"
+save_dir = r"/home/joost/mscth/data"
 out = loadmat(os.path.join(save_dir,'Silverbox_u_upsampled.mat'))
 u = out['u']
 
@@ -106,7 +106,7 @@ def SINDyLoss2(X_pred, X_true, Theta, Xi, l):
     l1_loss = l*torch.norm(l1_params, 1)
     return reg_loss, pred_loss, l1_loss
 
-epochs = 200000
+epochs = 10
 
 lambda_1 = 0
 
