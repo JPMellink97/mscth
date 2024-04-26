@@ -37,8 +37,6 @@ u = out['u']
 
 dt = 1
 
-idx_train = 800000
-
 # trim since batchting not implemented
 x_train = x_data
 u_train = u
@@ -88,7 +86,8 @@ def SINDyLoss2(X_pred, X_true, Theta, Xi, l):
     l1_params = torch.cat(params)
     Xi = Xi[0]
     reg_loss = 1/X_true.shape[0] *torch.sum(torch.abs(X_true-torch.matmul(Theta,torch.transpose(Xi,0,1)))**2)
-    pred_loss = 1/X_true.shape[0] *torch.sum(torch.abs(X_true-X_pred)**2)
+    # pred_loss = 1/X_true.shape[0] *torch.sum(torch.abs(X_true-X_pred)**2)
+    pred_loss = 0
     l1_loss = l*torch.norm(l1_params, 1)
     return reg_loss, pred_loss, l1_loss
 
@@ -126,4 +125,4 @@ for epo in tqdm(range(epochs)):
         # print("reg loss {:.4f}, pred loss {:.4f}, l1 loss: {:.4f}".format(reg, pred, l1))
 
 
-torch.save(model.state_dict(), "test_v2")
+torch.save(model.state_dict(), "test_v3")
