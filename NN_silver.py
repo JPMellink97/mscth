@@ -40,16 +40,10 @@ dt = 1
 idx_train = 800000
 
 # trim since batchting not implemented
-x_train = x_data[idx_train:,:]
-u_train = u[idx_train:,:]
+x_train = x_data
+u_train = u
 
 x_train = np.c_[x_train, u_train]
-
-# test
-x_test = x_data[0:idx_train,:]
-u_test = u[0:idx_train,:]
-
-x_test = np.c_[x_test, u_test]
 
 def normalize(y):
   y_mu = np.mean(y)
@@ -65,20 +59,12 @@ degree = 3
 
 # train
 train_x = x_train[:-1,:]
-Theta = torch.as_tensor(np.array(ps.PolynomialLibrary(degree=degree).fit(train_x).transform(train_x))).to(torch.float32)
+Theta = torch.as_tensor(np.array(ps.PolynomialLibrary(degree=degree, include_interaction=False).fit(train_x).transform(train_x))).to(torch.float32)
 
 if u_train is not None:
   target_x = torch.as_tensor(x_train[1:,:-1]).to(torch.float32)
 else:
   target_x = torch.as_tensor(x_train[1:,:]).to(torch.float32)
-
-# test
-test_x = x_test[:-1,:]
-Theta_test = torch.as_tensor(np.array(ps.PolynomialLibrary(degree=degree).fit(test_x).transform(test_x))).to(torch.float32)
-if u_test is not None:
-  target_x_test = torch.as_tensor(x_test[1:,:-1]).to(torch.float32)
-else:  
-  target_x_test = torch.as_tensor(x_test[1:,:]).to(torch.float32)
 
 class MLP(torch.nn.Module):
     def __init__(self, n_in, n_out):
@@ -106,9 +92,9 @@ def SINDyLoss2(X_pred, X_true, Theta, Xi, l):
     l1_loss = l*torch.norm(l1_params, 1)
     return reg_loss, pred_loss, l1_loss
 
-epochs = 10
+epochs = 100
 
-lambda_1 = 0
+lambda_1 = 1e-3
 
 batch_size = 256
 n_batches = Theta.shape[0]//batch_size
@@ -136,8 +122,8 @@ for epo in tqdm(range(epochs)):
 
     if (epo%(epochs//10)==0 or epo==epochs-1) and epo != 0:
         epo_p = epo if epo != epochs-1 else epo+1
-        print("Epoch {} train loss: {:.10f}".format(epo_p, loss))
-        print("reg loss {:.4f}, pred loss {:.4f}, l1 loss: {:.4f}".format(reg, pred, l1))
+        print("Epoch {} train loss: {}".format(epo_p, loss))
+        # print("reg loss {:.4f}, pred loss {:.4f}, l1 loss: {:.4f}".format(reg, pred, l1))
 
 
-torch.save(model.state_dict(), "test")
+torch.save(model.state_dict(), "test_v2")
