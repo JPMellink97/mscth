@@ -79,7 +79,7 @@ n_out = target_x.shape[-1]
 
 model = MLP(n_in, n_out)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-2, lr=1e-4)
 
 def SINDyLoss2(X_pred, X_true, Theta, Xi, l):
     params = [x.view(-1) for x in Xi]
@@ -91,7 +91,7 @@ def SINDyLoss2(X_pred, X_true, Theta, Xi, l):
     l1_loss = l*torch.norm(l1_params, 1)
     return reg_loss, pred_loss, l1_loss
 
-epochs = 100
+epochs = 500
 
 lambda_1 = 1e-4
 
@@ -125,4 +125,4 @@ for epo in tqdm(range(epochs)):
         print("reg loss {:.4f}, pred loss {:.4f}, l1 loss: {:.4f}".format(reg, pred, l1))
 
 
-torch.save(model.state_dict(), "test_v5")
+torch.save(model.state_dict(), "test_v6")
