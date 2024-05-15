@@ -9,6 +9,8 @@ from torch import nn
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 class SS_encoder_general_eq(SS_encoder_general):
     def __init__(self, nx=10, na=20, nb=20, feedthrough=False, \
         e_net=default_encoder_net, f_net=default_state_net, h_net=default_output_net, \
@@ -66,7 +68,9 @@ class SS_encoder_general_eq(SS_encoder_general):
             if loss_nf_cutoff is not None and error.item()>loss_nf_cutoff:
                 print(len(errors), end=' ')
                 break
-            x = self.fn(x,u) #advance state. 
+            
+            x = self.fn(x,u) #advance state.
+            ##################################
             
         return torch.mean(torch.stack(errors))
     
@@ -93,10 +97,8 @@ class simple_Linear(torch.nn.Module):
 
     def forward(self, x, u):
         x = torch.hstack((x, u.unsqueeze(1)))
+        x = x*1e-3
         Theta = self.feature_library.fit_transform(x)
-        mu = torch.mean(Theta)
-        std = torch.std(Theta)
-        Theta = (Theta-mu)/std
         out = self.layer(Theta)
         return out
     
@@ -126,12 +128,12 @@ def f2(x):
 def f3(x):
   return x**3
 
-functions = [f, f2, f3]
+functions = [f, f3]
 
 poly = feature_library(functions=functions)
 
 nx, nu = 2, 1 # state dimension and inputs
-na, nb = 5, 5
+na, nb = 50, 50
 
 f_net = simple_Linear
 f_net_kwargs= f_net_kwargs={"feature_library": poly, "u": nu, "nf": 10}
@@ -139,13 +141,25 @@ f_net_kwargs= f_net_kwargs={"feature_library": poly, "u": nu, "nf": 10}
 h_net = identity
 h_net_kwargs = {}
 
-fit_sys = SS_encoder_general_eq(nx=2, na=50, nb=50, \
+fit_sys = SS_encoder_general_eq(nx=nx, na=na, nb=nb, \
                                 f_net=f_net, f_net_kwargs=f_net_kwargs,\
-                                h_net=identity)
+                                h_net=identity,
+                                gamma=1e-8)
 
 train, test = deepSI.datasets.Silverbox()
-train, test = train[:1000], test[:1000]
+train, test = train, test
 
-fit_sys.fit(train, test, epochs=20, batch_size = 2, optimizer_kwargs={"lr": 1e-7}, loss_kwargs=dict(nf=100))
+fit_sys.fit(train, test, epochs=1000, batch_size = 256, optimizer_kwargs={"lr": 1e-2}, loss_kwargs=dict(nf=100))
 
-print([*fit_sys.fn.parameters()])
+f = open("test.txt", "w")
+f.write(str([*fit_sys.fn.parameters()]))
+f.close()
+
+test_sim_enc = fit_sys.apply_experiment(test)
+
+plt.plot(test.y)
+plt.plot(test.y - test_sim_enc.y)
+plt.title(f'test set simulation SS encoder, NRMS = {test_sim_enc.NRMS(test):.2%}')
+plt.show()
+plt.savefig('res_sim.png')
+plt.close()
