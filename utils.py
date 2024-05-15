@@ -1,6 +1,8 @@
 import numpy as np
 import pysindy as ps
 from pysindy import SINDy
+import os
+from scipy.io import loadmat
 
 
 class SINDy_model(SINDy):
@@ -109,3 +111,52 @@ def NRMS(y_pred, y_true):
 
 def center(y):
     return y-np.mean(y)
+
+
+def normalize(data, method="normalize", all_cols=False, per_col=True):
+
+    data = data[:,1:] if not all_cols else data
+
+    mu  = np.mean(data, axis=0) if per_col else np.mean(data)
+    std = np.std( data, axis=0) if per_col else np.std( data)
+    max = np.max( data, axis=0) if per_col else np.max( data)
+    min = np.min( data, axis=0) if per_col else np.min( data)
+
+    if method=="standardize":
+        num = mu
+        den = std
+        out = (data-num)/den
+    else:
+        num = mu
+        den = max-min
+        out = (data-num)/den
+    
+    out = np.c_[np.ones(data.shape[0]), out] if not all_cols else out
+        
+    return out, num, den
+
+
+def load_data(pc=1, set="own_data"):
+    if pc==0:
+        dir = r"C:\Users\20173928\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data\\"
+    else:
+        dir = r"\home\joost\mscth\data\\"
+
+    path = dir+set
+
+    if set=="own_data":
+        x_data = loadmat(os.path.join(path,'MSD1500k_x_data.mat'))
+        x_data = x_data['x']
+
+        u_data = loadmat(os.path.join(path,'MSD1500k_u_data.mat'))
+        u_data = u_data['u']
+
+        y_data = loadmat(os.path.join(path,'MSD1500k_y_data.mat'))
+        y_data = y_data['y']
+
+        th_data = loadmat(os.path.join(path,'MSD1500k_coeff.mat'))
+        th_data = th_data['th']
+
+        return x_data, u_data, y_data, th_data
+    
+    return
