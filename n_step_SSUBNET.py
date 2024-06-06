@@ -27,7 +27,7 @@ from matplotlib.colors import LinearSegmentedColormap
 # load data
 test_samples = 100000
 train_samples = 1400000
-x_data, u_data, y_data, th_data = load_data()
+x_data, u_data, y_data, th_data = load_data(set="SILVERSIN")
 train, test = System_data(u=u_data[:train_samples,0],y=x_data[:train_samples,:]), System_data(u=u_data[-test_samples:],y=x_data[-test_samples:,:])
 
 
@@ -180,7 +180,7 @@ fit_sys = SS_encoder_general_eq(nx=nx, na=na, nb=nb, \
                                 h_net=h_net)
 
 # fit auto_norm False
-fit_sys.fit(train, test, epochs=1000, batch_size = 1399900, optimizer_kwargs={"lr": 1e-3}, loss_kwargs=dict(nf=2), auto_fit_norm=False)
+fit_sys.fit(train, test, epochs=1000, batch_size = 100000, optimizer_kwargs={"lr": 1e-3}, loss_kwargs=dict(nf=2), auto_fit_norm=False)
 
 # process results
 test_sim_enc = fit_sys.apply_experiment(test)
