@@ -26,8 +26,9 @@ from matplotlib.colors import LinearSegmentedColormap
 
 # load data
 test_samples = 100000
-x_data, u_data, y_data, th_data = load_data()
-train, test = System_data(u=u_data[:-test_samples,0],y=x_data[:-test_samples,:]), System_data(u=u_data[-test_samples:],y=x_data[-test_samples:,:])
+train_samples = 500000
+x_data, u_data, y_data, th_data = load_data(pc=0)
+train, test = System_data(u=u_data[:train_samples,0],y=x_data[:train_samples,:]), System_data(u=u_data[-test_samples:],y=x_data[-test_samples:,:])
 
 # normalize
 x_data, n_n, n_d = normalize(x_data, all_cols=True, per_col=False,  method= "normalize")
@@ -182,7 +183,7 @@ fit_sys = SS_encoder_general_eq(nx=nx, na=na, nb=nb, \
                                 h_net=h_net)
 
 # fit auto_norm False
-fit_sys.fit(train, test, epochs=200, batch_size = 256, optimizer_kwargs={"lr": 1e-3}, loss_kwargs=dict(nf=100), auto_fit_norm=False)
+fit_sys.fit(train, test, epochs=1, batch_size = 8192, optimizer_kwargs={"lr": 1e-3}, loss_kwargs=dict(nf=100), auto_fit_norm=False)
 
 # process results
 test_sim_enc = fit_sys.apply_experiment(test)
@@ -249,3 +250,5 @@ ax2.patch.set_linewidth(2.0)
 ax2.patch.set_edgecolor('black')
 
 plt.show()
+plt.savefig('coeffs.png')
+plt.close()
