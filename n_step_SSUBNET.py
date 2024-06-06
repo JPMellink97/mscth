@@ -26,12 +26,10 @@ from matplotlib.colors import LinearSegmentedColormap
 
 # load data
 test_samples = 100000
+train_samples = 1400000
 x_data, u_data, y_data, th_data = load_data()
-train, test = System_data(u=u_data[:-test_samples,0],y=x_data[:-test_samples,:]), System_data(u=u_data[-test_samples:],y=x_data[-test_samples:,:])
+train, test = System_data(u=u_data[:train_samples,0],y=x_data[:train_samples,:]), System_data(u=u_data[-test_samples:],y=x_data[-test_samples:,:])
 
-# normalize
-x_data, n_n, n_d = normalize(x_data, all_cols=True, per_col=False,  method= "normalize")
-u_data = (u_data-n_n)/n_d
 
 class SS_encoder_general_eq(SS_encoder_general):
     def __init__(self, nx=10, na=20, nb=20, feedthrough=False, \
@@ -182,7 +180,7 @@ fit_sys = SS_encoder_general_eq(nx=nx, na=na, nb=nb, \
                                 h_net=h_net)
 
 # fit auto_norm False
-fit_sys.fit(train, test, epochs=200, batch_size = 256, optimizer_kwargs={"lr": 1e-3}, loss_kwargs=dict(nf=100), auto_fit_norm=False)
+fit_sys.fit(train, test, epochs=1000, batch_size = 1399900, optimizer_kwargs={"lr": 1e-3}, loss_kwargs=dict(nf=2), auto_fit_norm=False)
 
 # process results
 test_sim_enc = fit_sys.apply_experiment(test)
@@ -249,3 +247,13 @@ ax2.patch.set_linewidth(2.0)
 ax2.patch.set_edgecolor('black')
 
 plt.show()
+plt.savefig('coeffs.png')
+plt.close()
+
+nsteperror = fit_sys.n_step_error(test,nf=200) #return in NRMS units of fit_sys_ss_enc.norm
+plt.plot(nsteperror)
+plt.xlabel('n step in the future')
+plt.ylabel('NRMS error')
+plt.show()
+plt.savefig('nstep.png')
+plt.close()

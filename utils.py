@@ -140,7 +140,8 @@ def load_data(pc=1, set="own_data"):
     if pc==0:
         dir = r"C:\Users\20173928\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data\\"
     else:
-        dir = r"\home\joost\mscth\data\\"
+        dir = r"//home//joost//mscth//data//"
+        # /home/joost/mscth/data/own_data/MSD1500k_coeff.mat
 
     path = dir+set
 
