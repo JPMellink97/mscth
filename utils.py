@@ -59,14 +59,12 @@ class SINDy_model(SINDy):
             self.u_test = u_test
 
         self.data_split = data_split
-        
 
     def predict_s(self, train=False):
         if train:
             return self.predict(self.x_data, u=self.u_data)
         else:
             return self.predict(self.x_test, u=self.u_test)
-        
 
     def simulate_s(
         self,
@@ -98,42 +96,9 @@ class SINDy_model(SINDy):
                              interpolator=None,
                              integrator_kws={"method": "LSODA", "rtol": 1e-12, "atol": 1e-12},
                              interpolator_kws={})
-    
 
     def fit_s(self):
         return self.fit(self.x_data, u=self.u_data)
-
-
-def NRMS(y_pred, y_true):
-    RMS = np.sqrt(np.mean((y_pred-y_true)**2))
-    return RMS/np.std(y_true)
-
-
-def center(y):
-    return y-np.mean(y)
-
-
-def normalize(data, method="normalize", all_cols=False, per_col=True):
-
-    data = data[:,1:] if not all_cols else data
-
-    mu  = np.mean(data, axis=0) if per_col else np.mean(data)
-    std = np.std( data, axis=0) if per_col else np.std( data)
-    max = np.max( data, axis=0) if per_col else np.max( data)
-    min = np.min( data, axis=0) if per_col else np.min( data)
-
-    if method=="standardize":
-        num = mu
-        den = std
-        out = (data-num)/den
-    else:
-        num = mu
-        den = max-min
-        out = (data-num)/den
-    
-    out = np.c_[np.ones(data.shape[0]), out] if not all_cols else out
-        
-    return out, num, den
 
 
 def load_data(pc=1, set="MSD1500k"):
