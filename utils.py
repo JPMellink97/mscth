@@ -136,7 +136,7 @@ def normalize(data, method="normalize", all_cols=False, per_col=True):
     return out, num, den
 
 
-def load_data(pc=1, set="own_data"):
+def load_data(pc=1, set="MSD1500k"):
     if pc==0:
         dir = r"C:\Users\20173928\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data\\"
     else:
@@ -144,20 +144,17 @@ def load_data(pc=1, set="own_data"):
         # /home/joost/mscth/data/own_data/MSD1500k_coeff.mat
 
     path = dir+set
-
-    if set=="own_data":
-        x_data = loadmat(os.path.join(path,'MSD1500k_x_data.mat'))
-        x_data = x_data['x']
-
-        u_data = loadmat(os.path.join(path,'MSD1500k_u_data.mat'))
-        u_data = u_data['u']
-
-        y_data = loadmat(os.path.join(path,'MSD1500k_y_data.mat'))
-        y_data = y_data['y']
-
-        th_data = loadmat(os.path.join(path,'MSD1500k_coeff.mat'))
-        th_data = th_data['th']
-
-        return x_data, u_data, y_data, th_data
     
-    return
+    x_data = loadmat(os.path.join(path, set+"_x_data.mat"))
+    x_data = x_data['x']
+
+    u_data = loadmat(os.path.join(path, set+'_u_data.mat'))
+    u_data = u_data['u']
+
+    y_data = loadmat(os.path.join(path, set+'_y_data.mat'))
+    y_data = y_data['y']
+
+    th_data = loadmat(os.path.join(path, set+'_c_data.mat'))
+    th_data = th_data['th']
+
+    return x_data, u_data, y_data, th_data
