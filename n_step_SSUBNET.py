@@ -17,7 +17,7 @@ import os
 import deepSI
 from deepSI import System_data
 
-from utils import load_data, normalize
+from utils import load_data
 
 import matplotlib.pyplot as plt
 
@@ -27,12 +27,8 @@ from matplotlib.colors import LinearSegmentedColormap
 # load data
 test_samples = 100000
 train_samples = 500000
-x_data, u_data, y_data, th_data = load_data(pc=0)
+x_data, u_data, y_data, th_data = load_data(pc=0, set="SILVERSIN")
 train, test = System_data(u=u_data[:train_samples,0],y=x_data[:train_samples,:]), System_data(u=u_data[-test_samples:],y=x_data[-test_samples:,:])
-
-# normalize
-x_data, n_n, n_d = normalize(x_data, all_cols=True, per_col=False,  method= "normalize")
-u_data = (u_data-n_n)/n_d
 
 class SS_encoder_general_eq(SS_encoder_general):
     def __init__(self, nx=10, na=20, nb=20, feedthrough=False, \
