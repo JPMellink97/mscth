@@ -1,2 +1,6 @@
-data\OG-1-1-11.csv
-n_step_SSUBNET.py
+old_notebooks/
+images/
+models/
+*.pyc
+report_img/
+result_runs/

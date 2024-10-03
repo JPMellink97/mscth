@@ -1,125 +1,90 @@
-import numpy as np
-import pysindy as ps
-from pysindy import SINDy
 import os
-from scipy.io import loadmat
+from scipy.io import loadmat, savemat
 
 
-class SINDy_model(SINDy):
-    def __init__(
-        self,
-        x_data = None,
-        x_test = None,
-        u_data = None,
-        u_test = None,
-        data_split = False, # percentage of samples for test set
-        optimizer=None,
-        feature_library=None,
-        differentiation_method=None,
-        feature_names=None,
-        t_default=1,
-        discrete_time=False,
-    ):
-        if optimizer is None:
-            optimizer = ps.STLSQ()
-        self.optimizer = optimizer
-        if feature_library is None:
-            feature_library = ps.PolynomialLibrary()
-        self.feature_library = feature_library
-        if differentiation_method is None:
-            differentiation_method = ps.FiniteDifference(axis=-2)
-        self.differentiation_method = differentiation_method
-        if not isinstance(t_default, float) and not isinstance(t_default, int):
-            raise ValueError("t_default must be a positive number")
-        elif t_default <= 0:
-            raise ValueError("t_default must be a positive number")
+def load_data(pc_path=None, set=None):
+    try:
+        if pc_path==None:
+            dir = r"C:\Users\Joost\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data\\"
         else:
-            self.t_default = t_default
-        self.feature_names = feature_names
-        self.discrete_time = discrete_time
+            dir = pc_path
 
-        if isinstance(data_split, float) and (x_test is None):
-            # SPLIT is specified
-            Nx, Nu = x_data.shape[0], u_data.shape[0]
-            if Nx != Nu:
-                raise ValueError("x_data has more or less samples than u_data")
-            N_test = round(Nx*data_split)
-
-            self.x_data = x_data[:-N_test]
-            self.u_data = u_data[:-N_test]
-
-            self.x_test = x_data[-N_test:]
-            self.u_test = u_data[-N_test:]
-        else:
-            # no split 
-            self.x_data = x_data
-            self.u_data = u_data
-
-            self.x_test = x_test
-            self.u_test = u_test
-
-        self.data_split = data_split
-
-    def predict_s(self, train=False):
-        if train:
-            return self.predict(self.x_data, u=self.u_data)
-        else:
-            return self.predict(self.x_test, u=self.u_test)
-
-    def simulate_s(
-        self,
-        train=False,
-        integrator="solve_ivp",
-        stop_condition=None,
-        interpolator=None,
-        integrator_kws={"method": "LSODA", "rtol": 1e-12, "atol": 1e-12},
-        interpolator_kws={},
-    ):
-        # simulate full test sequence
-        if train:
-            x = self.x_data
-            u = self.u_data
-        else:
-            x = self.x_test
-            u = self.u_test
-
-        if self.discrete_time:
-            t_sim = u.shape[0]
-        else:
-            t_sim = np.linspace(0, self.t_default*x.shape[0], x.shape[0])
+        path = dir+set
         
-        return self.simulate(np.atleast_1d(x[0]), 
-                             u=u, 
-                             t=t_sim,
-                             integrator="solve_ivp",
-                             stop_condition=None,
-                             interpolator=None,
-                             integrator_kws={"method": "LSODA", "rtol": 1e-12, "atol": 1e-12},
-                             interpolator_kws={})
+        x_data = loadmat(os.path.join(path, set+"_x_data.mat"))
+        x_data = x_data['x']
 
-    def fit_s(self):
-        return self.fit(self.x_data, u=self.u_data)
+        u_data = loadmat(os.path.join(path, set+'_u_data.mat'))
+        u_data = u_data['u']
 
+        y_data = loadmat(os.path.join(path, set+'_y_data.mat'))
+        y_data = y_data['y']
 
-def load_data(pc=1, set="MSD1500k"):
-    if pc==0:
-        dir = r"C:\Users\20173928\OneDrive - TU Eindhoven\Documents\Master\thesis\mscth\data\\"
-    else:
-        dir = r"//home//joost//mscth//data//"
-        # /home/joost/mscth/data/own_data/MSD1500k_coeff.mat
+        eq_data = loadmat(os.path.join(path, set+'_eq_data.mat'))
+        eq_data = eq_data['eq']
 
-    path = dir+set
-    
-    x_data = loadmat(os.path.join(path, set+"_x_data.mat"))
-    x_data = x_data['x']
+        T_path = os.path.join(path, set+'_T_data.mat')
+        if os.path.exists(T_path):
+            T_data = loadmat(T_path)
+            T_data = T_data['T']
+        else:
+            T_data = None
 
-    u_data = loadmat(os.path.join(path, set+'_u_data.mat'))
-    u_data = u_data['u']
+        sU_path = os.path.join(path, set+'_sU_data.mat')
+        if os.path.exists(sU_path):
+            sU_data = loadmat(sU_path)
+            sU_data = sU_data['sU']
+        else:
+            sU_data = None
 
-    y_data = loadmat(os.path.join(path, set+'_y_data.mat'))
-    y_data = y_data['y']
+        set_idx_path = os.path.join(path, set+'_set_idx_data.mat')
+        if os.path.exists(set_idx_path):
+            set_idx_data = loadmat(set_idx_path)
+            set_idx_data = set_idx_data['set_idx']
+        else:
+            set_idx_data = None 
+        
+        print(f"Data loaded from {set}!")
 
-    th_data = loadmat(os.path.join(path, set+'_c_data.mat'))
-    th_data = th_data['th']
+        return x_data, u_data, y_data, eq_data, T_data, sU_data, set_idx_data
+    except:
+        print("failed?")
+        return
 
-    return x_data, u_data, y_data, th_data
+def save_data( set, u, x, Ts, eq, set_idx=None, y=None, T=None, sU=None, data_dir="data\\"):
+    try:
+        if y is None:
+            y = x[:,0]
+
+        # storing in dicts
+        x_mdic  = {"x" :  x}
+        y_mdic  = {"y" :  y}
+        u_mdic  = {"u" :  u}
+        Ts_mdic = {"Ts": Ts}
+        eq_mdic = {"eq": eq}
+
+        directory = data_dir+set
+        os.makedirs(directory, exist_ok=True)
+
+        savemat(directory+"\\"+set+"_x_data.mat",  x_mdic)
+        savemat(directory+"\\"+set+"_y_data.mat",  y_mdic)
+        savemat(directory+"\\"+set+"_u_data.mat",  u_mdic)
+        savemat(directory+"\\"+set+"_Ts_data.mat",Ts_mdic)
+        savemat(directory+"\\"+set+"_eq_data.mat", eq_mdic)
+
+        if T is not None:
+            T_mdic  = {"T" :  T}
+            savemat(directory+"\\"+set+"_T_data.mat",  T_mdic)
+
+        if sU is not None:
+            sU_mdic  = {"sU" :  sU}
+            savemat(directory+"\\"+set+"_sU_data.mat",  sU_mdic)
+
+        if set_idx is not None:
+            set_idx_mdic  = {"set_idx" :  set_idx}
+            savemat(directory+"\\"+set+"_set_idx_data.mat",  set_idx_mdic)
+
+        print(f"Saved succesfully to {set}!")
+    except:
+        print("Unsuccesful")
+    return
