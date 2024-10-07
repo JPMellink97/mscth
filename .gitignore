@@ -4,3 +4,4 @@ models/
 *.pyc
 report_img/
 result_runs/
+test.py
